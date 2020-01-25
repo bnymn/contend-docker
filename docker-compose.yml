@@ -1,0 +1,33 @@
+version: '3'
+services:
+    web:
+        build:
+            context: ./nginx
+        volumes: 
+            - ../src:/var/www
+            - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+            - ./nginx/sites-available:/etc/nginx/sites-available
+            - ./nginx/conf.d:/etc/nginx/conf.d
+        depends_on: 
+            - php-fpm
+        ports:
+            - "80:80"
+    php-fpm:
+        build:
+            context: ./php-fpm
+        volumes: 
+            - ../src:/var/www
+        depends_on: 
+            - db
+    db:
+        build:
+            context: ./mysql
+        environment:
+            - MYSQL_DATABASE=db
+            - MYSQL_USER=db
+            - MYSQL_PASSWORD=db
+            - MYSQL_ROOT_PASSWORD=root
+        volumes:
+            - ./mysql/data.sql:/docker-entrypoint-initdb.d/data.sql
+        ports: 
+            - "3306:3306"
