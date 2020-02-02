@@ -1,5 +1,8 @@
 FROM php:7.2-fpm-alpine
 
+ENV PHP_IDE_CONFIG "serverName=contend.test"
+ENV XDEBUG_CONFIG "idekey=PHPSTORM"
+
 RUN docker-php-ext-install pdo_mysql
 
 # Install imagick
@@ -41,6 +44,25 @@ RUN apk update \
     && docker-php-ext-enable xdebug \
     && docker-php-source delete \
     && apk del --no-cache g++ make autoconf
+
+# Install zip extension
+RUN apk add --no-cache libzip-dev \
+    && docker-php-ext-configure zip --with-libzip=/usr/include \
+    && docker-php-ext-install zip
+
+# Install Git
+RUN apk add --no-cache git
+
+# Install Openssh-Clien
+RUN apk add --no-cache openssh-client
+
+# Copy scripts
+RUN mkdir -p /scripts
+COPY ./scripts /scripts
+RUN chmod +x /scripts/*
+
+# Install PHP composer rool
+RUN /scripts/install-composer.sh
 
 WORKDIR /var/www
 
